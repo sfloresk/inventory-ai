@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  inventory-ai-infrastructure
+
+  Sample SAM Template for inventory-ai-infrastructure
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+
+Resources:
+  InventoryAiWebClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref InventoryAiUserPool
+      ClientName: InventoryAiWebClient
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+        
+  InventoryAiUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: InventoryAiUserPool
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      Schema:
+        - AttributeDataType: String
+          Name: email
+          Required: false
+
+  InventoryAiAPI:
+      Type: AWS::Serverless::Api
+      Properties:
+        StageName: dev
+        Cors:
+          AllowMethods: "'POST'"
+          AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          AllowOrigin: "'*'"
+        Auth:
+          Authorizers:
+            CognitoAuthorizer:
+              UserPoolArn: !GetAtt "InventoryAiUserPool.Arn"
+
+  DetectItemInImageFunction:
+    Timeout: 90
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      CodeUri: ./detectItemInImage/
+      Architectures:
+        - x86_64
+      Events:
+        DetectItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /detect/item
+            Method: POST
+            RestApiId: !Ref InventoryAiAPI
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource:
+              - "*"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource:
+              - "*"  
+
+  GenerateRecipeFunction:
+    Timeout: 90
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      CodeUri: ./generateRecipe/
+      Architectures:
+        - x86_64
+      Events:
+        DetectItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /recipe
+            Method: POST
+            RestApiId: !Ref InventoryAiAPI
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource:
+              - "*"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource:
+              - "*"  
+
+Outputs:
+  InfrastructureAI:
+    Description: "API URL"
+    Value: !Sub "https://${InventoryAiAPI}.execute-api.${AWS::Region}.amazonaws.com/"
