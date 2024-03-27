@@ -2,8 +2,8 @@
 
 A single page application to send images and text to the infrastructure. If accessed via a mobile phone, users can also take a picture directly instead of selecting one from the photo library
 
-![Inventory AI web user interface: image processing](./docs/image_processing_web_app.png)
-![Inventory AI web user interface: recipe generation](./docs/recipe_processing_web_app.png)
+![Inventory AI web user interface: image processing](../docs/image_processing_web_app.png)
+![Inventory AI web user interface: recipe generation](../docs/recipe_processing_web_app.png)
 
 ## Recommended IDE Setup
 
