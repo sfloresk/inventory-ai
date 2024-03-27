@@ -2,7 +2,8 @@
 
 A single page application to send images and text to the infrastructure. If accessed via a mobile phone, users can also take a picture directly instead of selecting one from the photo library
 
-![Web application screenshot](../docs/inventory_ai_web_app.png)
+![Inventory AI web user interface: image processing](./docs/image_processing_web_app.png)
+![Inventory AI web user interface: recipe generation](./docs/recipe_processing_web_app.png)
 
 ## Recommended IDE Setup
 
@@ -37,11 +38,11 @@ There are two files that need to be changed prior to run the solution:
     }
     ```
 
-2. [App.vue](./src/App.vue): In line 221 and 282, the API gateway URL needs to be added. You can find the value in the output of the SAM template executed [here](../infrastructure/README.md) or in the console. The App.vue file should look similar to this:
+2. [App.vue](./src/App.vue): In line 221 and 282, the API gateway URL needs to be added. You can find the value in the output of the SAM template executed [here](../infrastructure/README.md) or in the console. The code should look like this:
 
 ```javascript
 (...)
-          fetch("https://0123456789.execute-api.us-east-1.amazonaws.com/dev/recipes", {
+          fetch("https://0123456789.execute-api.us-east-1.amazonaws.com/dev/(...)", {
             "method": "POST",
 (...)
 ```

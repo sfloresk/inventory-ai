@@ -2,7 +2,7 @@
 
 This code provides an example of how to create an end-to-end solution to inference images of food products, detecting the name and brand. Additionally, it allows you to create a recipe from text, including images. It has been optimized to read images that contain a single product only
 
-![Architecture diagram](./docs/inventory_ai_architecture_diagram.png)
+![Architecture diagram](./docs/inventory_ai_architecture.png)
 
 ## Infrastructure
 
